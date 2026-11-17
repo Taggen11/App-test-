@@ -142,6 +142,14 @@ function sound(kind) {
     });
   } catch { /* inget ljud */ }
 }
+function buzz(kind) {
+  if (!state.settings.sound) return;
+  const H = window.Capacitor?.Plugins?.Haptics;
+  try {
+    if (H) return kind === "bad" ? H.notification({ type: "ERROR" }) : H.impact({ style: "LIGHT" });
+    navigator.vibrate?.(kind === "bad" ? [40, 60, 40] : 15);
+  } catch { /* ingen vibration */ }
+}
 function speak(text) {
   if (!("speechSynthesis" in window)) return toast("Uppläsning stöds inte i den här webbläsaren");
   speechSynthesis.cancel();
@@ -210,7 +218,30 @@ function ring(pct, color) {
     <circle cx="37" cy="37" r="${r}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"
       stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct)}"/></svg>`;
 }
+function renderWelcome() {
+  app.innerHTML = `
+    <div class="welcome">
+      <div class="hero">🚗</div>
+      <h1>Välkommen till Körkortskompis!</h1>
+      <p class="muted">Plugga till B-körkortet som ett spel – några minuter om dagen räcker.</p>
+      <div class="card" style="text-align:left">
+        <ol>
+          <li><b>Välj en värld</b> på kartan och kör en lektion på 8 frågor.</li>
+          <li><b>Samla XP</b>, håll din 🔥-svit vid liv och lås upp märken.</li>
+          <li><b>Fastnar du?</b> Fråga 🤖 Kompis – din AI-coach som hittar på minnesregler och idéer.</li>
+          <li><b>Testa dig</b> med 🎓 Provprov när du känner dig redo.</li>
+        </ol>
+      </div>
+      <div class="card" style="text-align:left">
+        <b>Behöver du stöd?</b>
+        <p class="muted" style="margin:4px 0 0">Under 🏆 Profil kan du slå på uppläsning, större text och lättläst läge.</p>
+      </div>
+      <button class="btn" id="startApp">Kör igång! 🚦</button>
+    </div>`;
+  $("#startApp").addEventListener("click", () => { state.onboarded = true; save(); go("map"); });
+}
 function renderMap() {
+  if (!state.onboarded) return renderWelcome();
   touchDay();
   const goalPct = Math.min(100, (state.todayXp / state.dailyGoal) * 100);
   const due = QUESTIONS.filter((q) => state.cards[q.id] && state.cards[q.id].due <= Date.now()).length;
@@ -362,10 +393,12 @@ function answer(oi) {
     quiz.xp += gain;
     addXp(gain);
     sound("good");
+    buzz("good");
   } else {
     quiz.combo = 0;
     quiz.wrongIds.add(q.id);
     sound("bad");
+    buzz("bad");
     // Fel fråga kommer tillbaka senare i lektionen (lärande, inte straff)
     if (quiz.mode === "lesson") quiz.queue.push(q);
   }
@@ -457,7 +490,7 @@ function finishQuiz(aborted = false) {
         <div><b>${qz.maxCombo}</b><small class="muted">Bästa combo</small></div>
         <div><b>${qz.log.filter((l) => l.ok).length}</b><small class="muted">Rätt svar</small></div>
       </div>
-      ${wrong.length ? `<div class="card" style="text-align:left"><b>Att öva mer på:</b><ul>${wrong.map((q) => `<li>${escapeHtml(q.q)}<br><small class="muted">✔ ${escapeHtml(q.opts[q.a])}</small></li>`).join("")}</ul></div>` : ""}
+      ${wrong.length ? `<div class="card" style="text-align:left"><b>Att öva mer på:</b><ul>${wrong.map((q) => `<li class="wrong-sign">${q.sign ? SIGNS[q.sign] : ""}${escapeHtml(q.q)}<br><small class="muted">✔ ${escapeHtml(q.opts[q.a])}</small></li>`).join("")}</ul></div>` : ""}
       <button class="btn" id="again">Spela igen</button>
       <div style="height:10px"></div>
       <button class="btn secondary" id="home">Till kartan</button>
@@ -674,12 +707,24 @@ function renderProfile() {
   });
 }
 
+// ───────────────────────── Android-bakåtknapp (mobilappen) ─────────────────────────
+try {
+  window.Capacitor?.Plugins?.App?.addListener("backButton", () => {
+    const fb = document.querySelector(".feedback");
+    if (fb) return fb.querySelector("[data-next]")?.click();
+    if (quiz) { if (confirm("Vill du avsluta? Dina framsteg hittills sparas.")) finishQuiz(true); return; }
+    if (currentTab !== "map") return go("map");
+    window.Capacitor.Plugins.App.exitApp();
+  });
+  window.Capacitor?.Plugins?.StatusBar?.setBackgroundColor?.({ color: "#1f6feb" });
+} catch { /* webbläsare */ }
+
 // ───────────────────────── Start ─────────────────────────
 applySettings();
 touchDay();
 save();
 updateTopbar();
 go("map");
-if ("serviceWorker" in navigator && location.protocol !== "file:") {
+if ("serviceWorker" in navigator && location.protocol !== "file:" && !window.Capacitor?.isNativePlatform?.()) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
 }

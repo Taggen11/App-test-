@@ -43,7 +43,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
-button { font: inherit; color: inherit; cursor: pointer; letter-spacing: inherit; }
+button { touch-action: manipulation; user-select: none; -webkit-user-select: none; font: inherit; color: inherit; cursor: pointer; letter-spacing: inherit; }
 h1, h2, h3 { margin: 0 0 .4em; line-height: 1.2; }
 p { margin: 0 0 .6em; }
 
@@ -215,3 +215,10 @@ body.in-quiz .tabbar { display: none; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 .opt.picked { border-color: var(--primary); box-shadow: 0 3px 0 var(--primary); }
 .mini-quiz { white-space: normal; }
+
+/* Välkomstskärm */
+.welcome { text-align: center; padding-top: 24px; }
+.welcome .hero { font-size: 5rem; animation: pop .6s; }
+.welcome ol { text-align: left; padding-left: 1.2em; }
+.welcome li { margin-bottom: .5em; }
+.wrong-sign .sign { width: 56px; height: 56px; margin: 4px 0; }
