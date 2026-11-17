@@ -126,6 +126,14 @@ async function readBody(req) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
+  // CORS så att mobilappen (Capacitor) kan nå AI-coachen
+  if (url.pathname.startsWith("/api/")) {
+    res.setHeader("access-control-allow-origin", "*");
+    res.setHeader("access-control-allow-methods", "GET, POST, OPTIONS");
+    res.setHeader("access-control-allow-headers", "content-type");
+    if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
+  }
+
   if (url.pathname === "/api/health") {
     return sendJson(res, 200, { ai: Boolean(client) && hasCredentials() });
   }

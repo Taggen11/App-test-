@@ -1,6 +1,7 @@
 import { WORLDS, QUESTIONS } from "./questions.js";
 import { SIGNS } from "./signs.js";
 import { offlineCoachReply } from "./coach-offline.js";
+import { API_BASE } from "./config.js";
 
 // ───────────────────────── Lagring ─────────────────────────
 const STORE_KEY = "korkortskompis-v1";
@@ -475,7 +476,7 @@ let aiOnline = null;
 async function checkAi() {
   if (aiOnline !== null) return aiOnline;
   try {
-    const r = await fetch("/api/health", { cache: "no-store" });
+    const r = await fetch(`${API_BASE}/api/health`, { cache: "no-store" });
     aiOnline = r.ok && (await r.json()).ai === true;
   } catch { aiOnline = false; }
   return aiOnline;
@@ -565,7 +566,7 @@ function miniQuizHtml(qz, i) {
 }
 
 async function callCoach(messages, mode) {
-  const r = await fetch("/api/coach", {
+  const r = await fetch(`${API_BASE}/api/coach`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ messages, stats: statsSummary(), mode }),
