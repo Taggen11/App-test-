@@ -1,0 +1,14 @@
+{
+  "name": "korkortskompis",
+  "version": "1.0.0",
+  "description": "Spelifierad mobilapp för att plugga till svenskt B-körkort, med AI-coach",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.9.0"
+  }
+}

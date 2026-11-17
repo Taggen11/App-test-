@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f6feb" />
+  <meta name="description" content="Plugga till B-körkort som ett spel – med AI-coachen Kompis." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Körkortskompis</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🚗 <span>Körkortskompis</span></div>
+    <div class="stats">
+      <span class="pill" title="Dagar i rad" id="streakPill">🔥 <b id="streak">0</b></span>
+      <span class="pill" title="Erfarenhetspoäng" id="xpPill">⭐ <b id="xp">0</b></span>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <nav class="tabbar" aria-label="Huvudmeny">
+    <button data-tab="map" class="active"><span>🗺️</span>Karta</button>
+    <button data-tab="play"><span>🎮</span>Spela</button>
+    <button data-tab="coach"><span>🤖</span>Kompis</button>
+    <button data-tab="profile"><span>🏆</span>Profil</button>
+  </nav>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
