@@ -1,2 +1,13 @@
 node_modules/
 .env
+.DS_Store
+*.log
+# Native build outputs (sources in android/ and ios/ are committed; see their own .gitignore files)
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+ios/App/build/
+ios/DerivedData/
+*.keystore
+*.jks

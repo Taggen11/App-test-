@@ -1,0 +1,22 @@
+{
+  "appId": "se.korkortskompis.app",
+  "appName": "Körkortskompis",
+  "webDir": "public",
+  "backgroundColor": "#1f6feb",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#1f6feb",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#1f6feb"
+    }
+  }
+}
