@@ -160,6 +160,20 @@ function speak(text) {
   if (sv) u.voice = sv;
   speechSynthesis.speak(u);
 }
+function askConfirm(msg, yes = "Ja", no = "Avbryt") {
+  return new Promise((resolve) => {
+    const d = document.createElement("div");
+    d.className = "modal";
+    d.innerHTML = `<div class="modal-box" role="dialog" aria-modal="true"><p><b>${escapeHtml(msg)}</b></p>
+      <div class="row"><button class="btn secondary" data-no>${no}</button><button class="btn" data-yes>${yes}</button></div></div>`;
+    document.body.appendChild(d);
+    const done = (v) => { d.remove(); resolve(v); };
+    d.querySelector("[data-yes]").addEventListener("click", () => done(true));
+    d.querySelector("[data-no]").addEventListener("click", () => done(false));
+    d.addEventListener("click", (e) => { if (e.target === d) done(false); });
+    d.querySelector("[data-no]").focus();
+  });
+}
 let toastTimer;
 function toast(msg) {
   const t = $("#toast");
@@ -361,7 +375,7 @@ function renderQuestion() {
     </div>`;
   if (quiz.endsAt) { clearTimeout(quiz.timer); tickTimer(); }
   $(".close").addEventListener("click", () => {
-    if (confirm("Vill du avsluta? Dina framsteg hittills sparas.")) finishQuiz(true);
+    askConfirm("Vill du avsluta? Dina framsteg hittills sparas.", "Avsluta").then((ok) => ok && quiz && finishQuiz(true));
   });
   $(".speak").addEventListener("click", () => speak(`${q.q}. ${order.map((oi, i) => `${"ABCD"[i]}: ${q.opts[oi]}`).join(". ")}`));
   app.querySelectorAll(".opt").forEach((b) => b.addEventListener("click", () => answer(Number(b.dataset.oi))));
@@ -703,7 +717,7 @@ function renderProfile() {
   $("#theme").addEventListener("change", (e) => { state.settings.theme = e.target.value; applySettings(); save(); });
   $("#goal").addEventListener("change", (e) => { state.dailyGoal = Number(e.target.value); save(); });
   $("#reset").addEventListener("click", () => {
-    if (confirm("Är du säker? All din progress raderas.")) { state = defaultState(); save(); applySettings(); updateTopbar(); go("map"); }
+    askConfirm("Är du säker? All din progress raderas.", "Radera allt").then((ok) => { if (ok) { state = defaultState(); save(); applySettings(); updateTopbar(); go("map"); } });
   });
 }
 
@@ -712,7 +726,8 @@ try {
   window.Capacitor?.Plugins?.App?.addListener("backButton", () => {
     const fb = document.querySelector(".feedback");
     if (fb) return fb.querySelector("[data-next]")?.click();
-    if (quiz) { if (confirm("Vill du avsluta? Dina framsteg hittills sparas.")) finishQuiz(true); return; }
+    if (document.querySelector(".modal")) return document.querySelector(".modal [data-no]").click();
+    if (quiz) { askConfirm("Vill du avsluta? Dina framsteg hittills sparas.", "Avsluta").then((ok) => ok && quiz && finishQuiz(true)); return; }
     if (currentTab !== "map") return go("map");
     window.Capacitor.Plugins.App.exitApp();
   });
